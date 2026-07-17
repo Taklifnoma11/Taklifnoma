@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taklif</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    padding: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+  .heart {
+    position: fixed;
+    top: -10%;
+    font-size: 24px;
+    opacity: 0.6;
+    animation: fall linear infinite;
+    pointer-events: none;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); }
+  }
+  .card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 24px;
+    padding: 40px 30px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 2;
+  }
+  h1 { color: #e0245e; font-size: 22px; margin-bottom: 10px; }
+  p { color: #555; font-size: 16px; line-height: 1.5; }
+  #qrcode { display: inline-block; margin: 20px auto; padding: 12px; background: white; border-radius: 16px; }
+  .btns { display: flex; gap: 16px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+  button {
+    font-size: 18px;
+    font-weight: 600;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  button:active { transform: scale(0.95); }
+  .yes-btn { background: #ff4d6d; color: white; box-shadow: 0 6px 16px rgba(255,77,109,0.4); }
+  .no-btn { background: #e0e0e0; color: #555; }
+  .final { font-size: 60px; animation: pop 0.5s ease; }
+  @keyframes pop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+  .retry-msg { color: #ff4d6d; font-weight: 600; margin-top: 10px; min-height: 24px; }
+  .small { font-size: 13px; color: #999; margin-top: 20px; }
+  input { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #ffc2d1; font-size: 16px; text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="card" id="card"></div>
+
+<script>
+/* ==========================================================
+   SOZLASH (CONFIG)
+   GitHub Pages'ga joylashtirgandan keyin, saytingiz manzilini
+   shu yerga yozing. Masalan:
+   const BASE_URL = "https://foydalanuvchi-nomi.github.io/repo-nomi/";
+   Bo'sh qoldirsangiz, sayt hozirgi manzilini o'zi aniqlaydi
+   (lokal tekshirish uchun mos, lekin telefonlar orasida
+   ishlashi uchun GitHub Pages manzilini yozish shart).
+   ========================================================== */
+const BASE_URL = "https://taklifnoma11.github.io/Taklifnoma/";
+
+/* Statistikani masofadan saqlash uchun oddiy bepul hisoblagich
+   (faqat "Yo'q" bosilgan sonini saqlaydi, hech kimga ko'rinmaydi,
+   faqat siz ?admin=1 orqali ko'rasiz) */
+const COUNTER_NAMESPACE = "taklif-app-2026";
+const COUNTER_KEY = "yoq-soni-x7k2m9";
+
+const params = new URLSearchParams(window.location.search);
+const isAsk = params.get('ask') === '1';
+const isAdmin = params.get('admin') === '1';
+const card = document.getElementById('card');
+
+function buildLink(queryStr) {
+  if (BASE_URL) {
+    return BASE_URL.replace(/\/?$/, '') + '/' + queryStr;
+  }
+  return window.location.origin + window.location.pathname + queryStr;
+}
+
+let userName = '';
+
+function renderNameForm() {
+  card.innerHTML = `
+    <div style="font-size:50px;">💌</div>
+    <h1>Assalomu alaykum!</h1>
+    <p>Avval ismingizni kiriting</p>
+    <input id="nameInput" type="text" placeholder="Ismingiz...">
+    <div class="btns">
+      <button class="yes-btn" onclick="submitName()">Davom etish ➡️</button>
+    </div>
+  `;
+}
+
+function submitName() {
+  const val = document.getElementById('nameInput').value.trim();
+  userName = val || 'Aziz do\'stim';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  card.innerHTML = `
+    <div style="font-size:50px;">💌</div>
+    <h1>${userName}, bitta savolim bor edi...</h1>
+    <p id="question">Men bilan uchrashuvga chiqishga rozimisiz?</p>
+    <div class="btns" id="btns">
+      <button class="yes-btn" onclick="sayYes()">✅ Ha</button>
+      <button class="no-btn" onclick="sayNo()">❌ Yo'q</button>
+    </div>
+    <div class="retry-msg" id="retryMsg"></div>
+  `;
+}
+
+const noMessages = [
+  "Yana bir marta urinib ko'ring 🥺",
+  "Iltimos, yaxshilab o'ylang... 🙏",
+  "Sizsiz bo'lmaydi, yana bir bor 😢",
+  "Yurak sizni kutmoqda, yana urining 💔➡️❤️"
+];
+let noCount = 0;
+
+function sayNo() {
+  noCount++;
+  const msg = document.getElementById('retryMsg');
+  msg.textContent = noMessages[Math.min(noCount - 1, noMessages.length - 1)];
+  // Faqat sizga ko'rinishi uchun, hisobni fon rejimida serverga yuboramiz
+  fetch(`https://api.countapi.xyz/hit/${COUNTER_NAMESPACE}/${COUNTER_KEY}`).catch(() => {});
+}
+
+function sayYes() {
+  card.innerHTML = `
+    <div class="final">🎉💍❤️</div>
+    <h1>Rahmat, ${userName}!</h1>
+    <p>Siz "Ha" dedingiz! Endi uchrashuvni rejalashtiramiz 😍</p>
+  `;
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => spawnHeart(), i * 60);
+  }
+}
+
+function spawnHeart() {
+  const h = document.createElement('div');
+  h.className = 'heart';
+  h.textContent = ['❤️','💕','💖','💗'][Math.floor(Math.random()*4)];
+  h.style.left = Math.random() * 100 + 'vw';
+  h.style.fontSize = (16 + Math.random()*20) + 'px';
+  h.style.animationDuration = (3 + Math.random()*3) + 's';
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 6000);
+}
+setInterval(spawnHeart, 700);
+
+function renderHome() {
+  const url = buildLink('?ask=1');
+  card.innerHTML = `
+    <div style="font-size:50px;">📱💘</div>
+    <h1>QR kodni skanerlang</h1>
+    <p>Bu QR kod so'rovnomaga olib boradi</p>
+    <div id="qrcode"></div>
+    <p class="small">Bu sahifani ko'rsating, u telefonidan skanerlasin</p>
+    <p class="small">Natijani ko'rish uchun: <a href="?admin=1">shu yerga bosing</a></p>
+  `;
+  new QRCode(document.getElementById("qrcode"), {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: "#e0245e",
+    colorLight: "#ffffff"
+  });
+}
+
+function renderAdmin() {
+  card.innerHTML = `
+    <div style="font-size:50px;">🔒📊</div>
+    <h1>Faqat siz uchun</h1>
+    <p id="adminResult">Yuklanmoqda...</p>
+    <div class="btns">
+      <button class="yes-btn" onclick="loadCount()">🔄 Yangilash</button>
+    </div>
+    <p class="small"><a href="?">Bosh sahifaga qaytish</a></p>
+  `;
+  loadCount();
+}
+
+function loadCount() {
+  const el = document.getElementById('adminResult');
+  el.textContent = "Yuklanmoqda...";
+  fetch(`https://api.countapi.xyz/get/${COUNTER_NAMESPACE}/${COUNTER_KEY}`)
+    .then(r => r.json())
+    .then(data => {
+      const count = data.value || 0;
+      el.textContent = `"Yo'q" tugmasi jami ${count} marta bosilgan`;
+    })
+    .catch(() => { el.textContent = "Hozircha ma'lumot yo'q (hali hech kim 'Yo'q' bosmagan)"; });
+}
+
+if (isAdmin) {
+  renderAdmin();
+} else if (isAsk) {
+  renderNameForm();
+} else {
+  renderHome();
+}
+</script>
+
+</body>
+</html>
