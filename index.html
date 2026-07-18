@@ -86,9 +86,11 @@ const BASE_URL = "https://taklifnoma11.github.io/Taklifnoma/";
 
 /* Statistikani masofadan saqlash uchun oddiy bepul hisoblagich
    (faqat "Yo'q" bosilgan sonini saqlaydi, hech kimga ko'rinmaydi,
-   faqat siz ?admin=1 orqali ko'rasiz) */
-const COUNTER_NAMESPACE = "taklif-app-2026";
-const COUNTER_KEY = "yoq-soni-x7k2m9";
+   faqat siz ?admin=1 orqali ko'rasiz).
+   Diqqat: kalit (COUNTER_KEY) ochiq bo'lgani uchun uni topganlar
+   ham qiymatini ko'ra oladi, lekin kalit nomi taxmin qilib
+   bo'lmaydigan darajada noyob qilingan. */
+const COUNTER_KEY = "taklifnoma11-yoq-soni-x7k2m9-2026";
 
 const params = new URLSearchParams(window.location.search);
 const isAsk = params.get('ask') === '1';
@@ -148,7 +150,7 @@ function sayNo() {
   const msg = document.getElementById('retryMsg');
   msg.textContent = noMessages[Math.min(noCount - 1, noMessages.length - 1)];
   // Faqat sizga ko'rinishi uchun, hisobni fon rejimida serverga yuboramiz
-  fetch(`https://api.countapi.xyz/hit/${COUNTER_NAMESPACE}/${COUNTER_KEY}`).catch(() => {});
+  fetch(`https://countapi.mileshilliard.com/api/v1/hit/${COUNTER_KEY}`).catch(() => {});
 }
 
 function sayYes() {
@@ -182,7 +184,6 @@ function renderHome() {
     <p>Bu QR kod so'rovnomaga olib boradi</p>
     <div id="qrcode"></div>
     <p class="small">Bu sahifani ko'rsating, u telefonidan skanerlasin</p>
-    <p class="small">Natijani ko'rish uchun: <a href="?admin=1">shu yerga bosing</a></p>
   `;
   new QRCode(document.getElementById("qrcode"), {
     text: url,
@@ -209,7 +210,7 @@ function renderAdmin() {
 function loadCount() {
   const el = document.getElementById('adminResult');
   el.textContent = "Yuklanmoqda...";
-  fetch(`https://api.countapi.xyz/get/${COUNTER_NAMESPACE}/${COUNTER_KEY}`)
+  fetch(`https://countapi.mileshilliard.com/api/v1/get/${COUNTER_KEY}`)
     .then(r => r.json())
     .then(data => {
       const count = data.value || 0;
