@@ -92,6 +92,22 @@ const BASE_URL = "https://taklifnoma11.github.io/Taklifnoma/";
    bo'lmaydigan darajada noyob qilingan. */
 const COUNTER_KEY = "taklifnoma11-yoq-soni-x7k2m9-2026";
 
+/* Telegram orqali xabar yuborish uchun (kim qanday javob berganini
+   sizga to'g'ridan-to'g'ri Telegram'da ko'rsatadi).
+   Diqqat: bu token sahifa manbasida ko'rinadi (client-side), shuning
+   uchun uni faqat shu maqsad uchun ishlating va boshqa joyda
+   ishlatmang. */
+const TELEGRAM_BOT_TOKEN = "8947967987:AAHTEOuxv8H_JnV0t6fbXucJdokS4sQeclY";
+const TELEGRAM_CHAT_ID = "5989643990";
+
+function sendTelegram(text) {
+  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: text })
+  }).catch(() => {});
+}
+
 const params = new URLSearchParams(window.location.search);
 const isAsk = params.get('ask') === '1';
 const isAdmin = params.get('admin') === '1';
@@ -151,6 +167,7 @@ function sayNo() {
   msg.textContent = noMessages[Math.min(noCount - 1, noMessages.length - 1)];
   // Faqat sizga ko'rinishi uchun, hisobni fon rejimida serverga yuboramiz
   fetch(`https://countapi.mileshilliard.com/api/v1/hit/${COUNTER_KEY}`).catch(() => {});
+  sendTelegram(`❌ ${userName} "Yo'q" dedi (${noCount}-marta)`);
 }
 
 function sayYes() {
@@ -159,6 +176,7 @@ function sayYes() {
     <h1>Rahmat, ${userName}!</h1>
     <p>Siz "Ha" dedingiz! Endi uchrashuvni rejalashtiramiz 😍</p>
   `;
+  sendTelegram(`✅ ${userName} "Ha" dedi! 🎉`);
   for (let i = 0; i < 30; i++) {
     setTimeout(() => spawnHeart(), i * 60);
   }
