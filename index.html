@@ -216,13 +216,43 @@ function moveNoButton() {
 }
 
 function sayYes() {
+  sendTelegram(`✅ ${userName} "Ha" dedi! 🎉`);
+  renderMovieForm();
+}
+
+function renderMovieForm() {
+  card.innerHTML = `
+    ${cardBanner}
+    <div style="font-size:50px;">🎬</div>
+    <h1>Ajoyib, ${userName}!</h1>
+    <p>Keling, kinoga birga boramiz. Qaysi kino va qachon?</p>
+    <input id="movieInput" type="text" placeholder="Kino nomi...">
+    <input id="dateInput" type="datetime-local" style="margin-top:10px;">
+    <div class="btns">
+      <button class="yes-btn" onclick="submitMovie()">Yuborish 🎉</button>
+    </div>
+  `;
+}
+
+function submitMovie() {
+  const movie = document.getElementById('movieInput').value.trim() || 'kiritilmagan';
+  const rawDate = document.getElementById('dateInput').value;
+  let dateText = 'kiritilmagan';
+  if (rawDate) {
+    const d = new Date(rawDate);
+    dateText = d.toLocaleString('uz-UZ', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+  }
+  sendTelegram(`🎬 ${userName} bilan kino rejasi:\nKino: ${movie}\nQachon: ${dateText}`);
+  renderFinal(movie, dateText);
+}
+
+function renderFinal(movie, dateText) {
   card.innerHTML = `
     ${cardBanner}
     <div class="final">🎉💍❤️</div>
     <h1>Rahmat, ${userName}!</h1>
-    <p>Siz "Ha" dedingiz! Endi uchrashuvni rejalashtiramiz 😍</p>
+    <p>"${movie}" kinosiga ${dateText} da ko'rishguncha! 😍</p>
   `;
-  sendTelegram(`✅ ${userName} "Ha" dedi! 🎉`);
   for (let i = 0; i < 30; i++) {
     setTimeout(() => spawnHeart(), i * 60);
   }
