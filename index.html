@@ -21,6 +21,35 @@
     overflow: hidden;
     position: relative;
   }
+
+  /* ===== Fon: mavzuli sahnalar + xira rasm ===== */
+  .bg-scenes, .bg-photo { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+  .scene {
+    position: absolute; inset: 0; opacity: 0;
+    animation: sceneFade 25s infinite;
+    overflow: hidden;
+  }
+  .scene span.e { position: absolute; opacity: 0.35; user-select: none; }
+  .scene .label {
+    position: absolute; left: 0; right: 0; bottom: 6%;
+    text-align: center; font-family: 'Playfair Display', serif;
+    font-style: italic; font-size: 22px; color: rgba(255,255,255,0.95);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25); opacity: 1;
+  }
+  @keyframes sceneFade {
+    0%   { opacity: 0; }
+    4%   { opacity: 1; }
+    20%  { opacity: 1; }
+    24%  { opacity: 0; }
+    100% { opacity: 0; }
+  }
+  .bg-photo {
+    background: url('photo.jpg') center 30% / cover no-repeat;
+    opacity: 0.28;
+    filter: blur(1.5px) saturate(0.85);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 95%);
+            mask-image: radial-gradient(ellipse at center, #000 35%, transparent 95%);
+  }
   .heart {
     position: fixed;
     top: -10%;
@@ -131,6 +160,21 @@
   .yes-btn { background: #ff4d6d; color: white; box-shadow: 0 6px 16px rgba(255,77,109,0.4); }
   .no-btn { background: #e0e0e0; color: #555; transition: transform 0.15s ease, left 0.2s ease, top 0.2s ease; }
   .no-btn.roaming { position: fixed; z-index: 50; }
+
+  .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+  .choice {
+    border: 3px solid transparent; border-radius: 18px; padding: 16px 8px 12px;
+    cursor: pointer; color: #fff; font-weight: 700; font-size: 15px;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    position: relative; overflow: hidden;
+  }
+  .choice:active { transform: scale(0.96); }
+  .choice:last-child { grid-column: 1 / -1; }
+  .choice .big { font-size: 44px; line-height: 1.1; display: block; margin-bottom: 4px; }
+  .choice .mini { position: absolute; font-size: 20px; opacity: 0.35; }
+  .back-link { display:inline-block; margin-top:18px; color:#e0245e; font-size:14px; cursor:pointer; text-decoration:underline; }
   .final { font-size: 60px; animation: pop 0.5s ease; }
   @keyframes pop {
     0% { transform: scale(0); }
@@ -143,6 +187,9 @@
 </style>
 </head>
 <body>
+
+<div class="bg-scenes" id="bgScenes"></div>
+<div class="bg-photo"></div>
 
 <div class="card" id="card"></div>
 
@@ -178,6 +225,40 @@ function sendTelegram(text) {
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(text)}`;
   fetch(url).catch(() => {});
 }
+
+
+/* Fon sahnalari: bowling, kino, hayvonot bog'i, teatr, konki */
+const SCENES = [
+  { emoji: ['🎳','🎳','🏆'], text: 'Bowling night 🎳',     grad: 'linear-gradient(160deg,#ff9a9e,#fad0c4)' },
+  { emoji: ['🎬','🍿','🎞️'], text: 'Movie night 🍿',       grad: 'linear-gradient(160deg,#a18cd1,#fbc2eb)' },
+  { emoji: ['🦁','🐘','🦒','🐧'], text: 'Zoo night 🦁',     grad: 'linear-gradient(160deg,#84fab0,#8fd3f4)' },
+  { emoji: ['🎭','🎟️','🌹'], text: 'Theatre night 🎭',     grad: 'linear-gradient(160deg,#f6d365,#fda085)' },
+  { emoji: ['⛸️','❄️','⛄'], text: 'Ice-skating ⛸️',       grad: 'linear-gradient(160deg,#a1c4fd,#c2e9fb)' }
+];
+(function buildScenes() {
+  const wrap = document.getElementById('bgScenes');
+  SCENES.forEach((sc, i) => {
+    const d = document.createElement('div');
+    d.className = 'scene';
+    d.style.background = sc.grad;
+    d.style.animationDelay = (i * 5) + 's';
+    for (let k = 0; k < 28; k++) {
+      const e = document.createElement('span');
+      e.className = 'e';
+      e.textContent = sc.emoji[k % sc.emoji.length];
+      e.style.left = (Math.random() * 92) + '%';
+      e.style.top = (Math.random() * 90) + '%';
+      e.style.fontSize = (22 + Math.random() * 34) + 'px';
+      e.style.transform = 'rotate(' + (Math.random() * 40 - 20) + 'deg)';
+      d.appendChild(e);
+    }
+    const l = document.createElement('div');
+    l.className = 'label';
+    l.textContent = sc.text;
+    d.appendChild(l);
+    wrap.appendChild(d);
+  });
+})();
 
 const params = new URLSearchParams(window.location.search);
 const isAsk = params.get('ask') === '1';
@@ -288,41 +369,80 @@ function sayYes() {
   renderMovieForm();
 }
 
-function renderMovieForm() {
+const ACTIVITIES = [
+  { id: 'bowling', title: 'Bowling night', emoji: '🎳', minis: ['🏆','🎳'], grad: 'linear-gradient(160deg,#ff7a9c,#ffb199)' },
+  { id: 'movie',   title: 'Movie night',   emoji: '🍿', minis: ['🎬','🎞️'], grad: 'linear-gradient(160deg,#8e7cc3,#e5a8e8)' },
+  { id: 'zoo',     title: 'Zoo night',     emoji: '🦁', minis: ['🐘','🦒'], grad: 'linear-gradient(160deg,#43c59e,#7ec8e3)' },
+  { id: 'theatre', title: 'Theatre night', emoji: '🎭', minis: ['🎟️','🌹'], grad: 'linear-gradient(160deg,#f2a83b,#f27d5b)' },
+  { id: 'skating', title: 'Ice-skating',   emoji: '⛸️', minis: ['❄️','⛄'], grad: 'linear-gradient(160deg,#6a9cf5,#8fd3f4)' }
+];
+let chosenActivity = null;
+
+function renderMovieForm() { renderActivityChoice(); }
+
+function renderActivityChoice() {
+  const cards = ACTIVITIES.map((a, i) => `
+    <div class="choice" style="background:${a.grad}" onclick="chooseActivity(${i})">
+      <span class="mini" style="left:8px; top:6px;">${a.minis[0]}</span>
+      <span class="mini" style="right:8px; top:6px;">${a.minis[1]}</span>
+      <span class="big">${a.emoji}</span>
+      ${a.title}
+    </div>`).join('');
   card.innerHTML = `
   <div class="card-inner">
     ${cardBanner}
-    <div style="font-size:50px;">🎬</div>
+    <div style="font-size:50px;">💖</div>
     <h1>Ajoyib, ${userName}!</h1>
-    <p>Keling, kinoga birga boramiz. Qaysi kino va qachon?</p>
-    <input id="movieInput" type="text" placeholder="Kino nomi...">
-    <input id="dateInput" type="datetime-local" style="margin-top:10px;">
-    <div class="btns">
-      <button class="yes-btn" onclick="submitMovie()">Yuborish 🎉</button>
-    </div>
+    <p>Qayerga boramiz? Birini tanlang:</p>
+    <div class="choice-grid">${cards}</div>
   </div>
   `;
 }
 
-function submitMovie() {
-  const movie = document.getElementById('movieInput').value.trim() || 'kiritilmagan';
-  const rawDate = document.getElementById('dateInput').value;
-  let dateText = 'kiritilmagan';
-  if (rawDate) {
-    const d = new Date(rawDate);
-    dateText = d.toLocaleString('uz-UZ', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
-  }
-  sendTelegram(`🎬 ${userName} bilan kino rejasi:\nKino: ${movie}\nQachon: ${dateText}`);
-  renderFinal(movie, dateText);
+function chooseActivity(i) {
+  chosenActivity = ACTIVITIES[i];
+  sendTelegram(`${chosenActivity.emoji} ${userName} tanladi: ${chosenActivity.title}`);
+  renderDateForm();
 }
 
-function renderFinal(movie, dateText) {
+function renderDateForm() {
+  const a = chosenActivity;
   card.innerHTML = `
   <div class="card-inner">
     ${cardBanner}
-    <div class="final">🎉💍❤️</div>
+    <div style="font-size:50px;">${a.emoji}</div>
+    <h1>${a.title}</h1>
+    <p>Qaysi kuni va soat nechada bo'lsin?</p>
+    <input id="dateInput" type="datetime-local">
+    <div class="retry-msg" id="dateMsg"></div>
+    <div class="btns">
+      <button class="yes-btn" onclick="submitDate()">Yuborish 🎉</button>
+    </div>
+    <span class="back-link" onclick="renderActivityChoice()">⬅️ Boshqasini tanlash</span>
+  </div>
+  `;
+}
+
+function submitDate() {
+  const rawDate = document.getElementById('dateInput').value;
+  if (!rawDate) {
+    document.getElementById('dateMsg').textContent = "Iltimos, kun va vaqtni tanlang 🙏";
+    return;
+  }
+  const d = new Date(rawDate);
+  const dateText = d.toLocaleString('uz-UZ', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+  const a = chosenActivity;
+  sendTelegram(`${a.emoji} ${userName} bilan reja:\nQayerga: ${a.title}\nQachon: ${dateText}`);
+  renderFinal(a, dateText);
+}
+
+function renderFinal(a, dateText) {
+  card.innerHTML = `
+  <div class="card-inner">
+    ${cardBanner}
+    <div class="final">🎉${a.emoji}❤️</div>
     <h1>Rahmat, ${userName}!</h1>
-    <p>"${movie}" kinosiga ${dateText} da ko'rishguncha! 😍</p>
+    <p>${a.title} — ${dateText} da ko'rishguncha! 😍</p>
   </div>
   `;
   for (let i = 0; i < 30; i++) {
