@@ -44,11 +44,11 @@
     100% { opacity: 0; }
   }
   .bg-photo {
+    inset: 0;
+    width: 100vw; height: 100vh;
     background: url('photo.jpg') center 30% / cover no-repeat;
-    opacity: 0.28;
-    filter: blur(1.5px) saturate(0.85);
-    -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 95%);
-            mask-image: radial-gradient(ellipse at center, #000 35%, transparent 95%);
+    opacity: 0.6;
+    filter: blur(0.5px) saturate(0.9);
   }
   .heart {
     position: fixed;
@@ -69,7 +69,7 @@
     z-index: 2;
   }
   .card-inner {
-    background: rgba(255,255,255,0.95);
+    background: rgba(255,255,255,0.88);
     border-radius: 24px;
     padding: 40px 30px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
@@ -85,11 +85,13 @@
   .card-banner svg { width: 100%; height: 100%; display: block; }
 
   .invite-card {
-    background: linear-gradient(160deg, #fdf3ec 0%, #f7e2df 100%);
+    background: linear-gradient(160deg, rgba(253,243,236,0.88) 0%, rgba(247,226,223,0.88) 100%);
     border: 1px solid #c9a45c;
     border-radius: 4px;
-    padding: 34px 22px;
+    padding: 24px 18px;
     position: relative;
+    max-width: 300px;
+    margin: 0 auto;
   }
   .invite-card::before {
     content: "";
@@ -117,23 +119,23 @@
     font-family: 'Playfair Display', serif;
     font-style: italic;
     color: #4a3b35;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.5;
-    margin-bottom: 22px;
+    margin: 8px 0 16px;
   }
   .invite-qrbox {
     background: white;
     display: inline-block;
-    padding: 16px;
+    padding: 6px;
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
   }
   .invite-scan {
     font-family: 'Playfair Display', serif;
     font-style: italic;
     color: #4a3b35;
-    font-size: 15px;
-    margin-top: 22px;
+    font-size: 14px;
+    margin-top: 14px;
   }
   .invite-signature {
     font-family: 'Playfair Display', serif;
@@ -145,7 +147,7 @@
   }
   h1 { color: #e0245e; font-size: 22px; margin-bottom: 10px; }
   p { color: #555; font-size: 16px; line-height: 1.5; }
-  #qrcode { display: inline-block; margin: 20px auto; padding: 12px; background: white; border-radius: 16px; }
+  #qrcode { display: inline-block; margin: 0; padding: 0; background: white; line-height: 0; }
   .btns { display: flex; gap: 16px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
   button {
     font-size: 18px;
@@ -163,17 +165,23 @@
 
   .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
   .choice {
-    border: 3px solid transparent; border-radius: 18px; padding: 16px 8px 12px;
-    cursor: pointer; color: #fff; font-weight: 700; font-size: 15px;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+    border: 3px solid transparent; border-radius: 18px; padding: 0;
+    cursor: pointer; background: #fff; color: #4a3b35;
     box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     transition: transform 0.15s ease, border-color 0.15s ease;
-    position: relative; overflow: hidden;
+    overflow: hidden; display: flex; flex-direction: column;
   }
-  .choice:active { transform: scale(0.96); }
+  .choice:active { transform: scale(0.96); border-color: #ff4d6d; }
   .choice:last-child { grid-column: 1 / -1; }
-  .choice .big { font-size: 44px; line-height: 1.1; display: block; margin-bottom: 4px; }
-  .choice .mini { position: absolute; font-size: 20px; opacity: 0.35; }
+  .choice .pic {
+    height: 110px; position: relative; display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .choice:last-child .pic { height: 130px; }
+  .choice .pic .big { font-size: 54px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); z-index: 1; }
+  .choice .pic .mini { position: absolute; font-size: 22px; opacity: 0.45; }
+  .choice .pic img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; }
+  .choice .cap { padding: 10px 6px 12px; font-weight: 700; font-size: 15px; background: #fff; }
   .back-link { display:inline-block; margin-top:18px; color:#e0245e; font-size:14px; cursor:pointer; text-decoration:underline; }
   .final { font-size: 60px; animation: pop 0.5s ease; }
   @keyframes pop {
@@ -370,11 +378,11 @@ function sayYes() {
 }
 
 const ACTIVITIES = [
-  { id: 'bowling', title: 'Bowling night', emoji: '🎳', minis: ['🏆','🎳'], grad: 'linear-gradient(160deg,#ff7a9c,#ffb199)' },
-  { id: 'movie',   title: 'Movie night',   emoji: '🍿', minis: ['🎬','🎞️'], grad: 'linear-gradient(160deg,#8e7cc3,#e5a8e8)' },
-  { id: 'zoo',     title: 'Zoo night',     emoji: '🦁', minis: ['🐘','🦒'], grad: 'linear-gradient(160deg,#43c59e,#7ec8e3)' },
-  { id: 'theatre', title: 'Theatre night', emoji: '🎭', minis: ['🎟️','🌹'], grad: 'linear-gradient(160deg,#f2a83b,#f27d5b)' },
-  { id: 'skating', title: 'Ice-skating',   emoji: '⛸️', minis: ['❄️','⛄'], grad: 'linear-gradient(160deg,#6a9cf5,#8fd3f4)' }
+  { id: 'bowling', img: 'bowling.jpg', title: 'Bowling night', emoji: '🎳', minis: ['🏆','🎳'], grad: 'linear-gradient(160deg,#ff7a9c,#ffb199)' },
+  { id: 'movie', img: 'movie.jpg',   title: 'Movie night',   emoji: '🍿', minis: ['🎬','🎞️'], grad: 'linear-gradient(160deg,#8e7cc3,#e5a8e8)' },
+  { id: 'zoo', img: 'zoo.jpg',     title: 'Zoo night',     emoji: '🦁', minis: ['🐘','🦒'], grad: 'linear-gradient(160deg,#43c59e,#7ec8e3)' },
+  { id: 'theatre', img: 'theatre.jpg', title: 'Theatre night', emoji: '🎭', minis: ['🎟️','🌹'], grad: 'linear-gradient(160deg,#f2a83b,#f27d5b)' },
+  { id: 'skating', img: 'skating.jpg', title: 'Ice-skating',   emoji: '⛸️', minis: ['❄️','⛄'], grad: 'linear-gradient(160deg,#6a9cf5,#8fd3f4)' }
 ];
 let chosenActivity = null;
 
@@ -382,18 +390,22 @@ function renderMovieForm() { renderActivityChoice(); }
 
 function renderActivityChoice() {
   const cards = ACTIVITIES.map((a, i) => `
-    <div class="choice" style="background:${a.grad}" onclick="chooseActivity(${i})">
-      <span class="mini" style="left:8px; top:6px;">${a.minis[0]}</span>
-      <span class="mini" style="right:8px; top:6px;">${a.minis[1]}</span>
-      <span class="big">${a.emoji}</span>
-      ${a.title}
+    <div class="choice" onclick="chooseActivity(${i})">
+      <div class="pic" style="background:${a.grad}">
+        <span class="mini" style="left:10px; top:8px;">${a.minis[0]}</span>
+        <span class="mini" style="right:10px; top:8px;">${a.minis[1]}</span>
+        <span class="mini" style="left:18px; bottom:8px;">${a.minis[1]}</span>
+        <span class="mini" style="right:18px; bottom:8px;">${a.minis[0]}</span>
+        <span class="big">${a.emoji}</span>
+        <img src="${a.img}" alt="${a.title}" onerror="this.remove()">
+      </div>
+      <div class="cap">${a.emoji} ${a.title}</div>
     </div>`).join('');
   card.innerHTML = `
   <div class="card-inner">
     ${cardBanner}
-    <div style="font-size:50px;">💖</div>
-    <h1>Ajoyib, ${userName}!</h1>
-    <p>Qayerga boramiz? Birini tanlang:</p>
+    <h1>${userName}, qaysi birini tanlaysiz? 💖</h1>
+    <p>Mana 5 ta g'oya, bittasini bosing:</p>
     <div class="choice-grid">${cards}</div>
   </div>
   `;
@@ -411,8 +423,8 @@ function renderDateForm() {
   <div class="card-inner">
     ${cardBanner}
     <div style="font-size:50px;">${a.emoji}</div>
-    <h1>${a.title}</h1>
-    <p>Qaysi kuni va soat nechada bo'lsin?</p>
+    <h1>${a.title} 💕</h1>
+    <p>Qachon bo'lsin? Kun va vaqtni tanlang 🗓️⏰</p>
     <input id="dateInput" type="datetime-local">
     <div class="retry-msg" id="dateMsg"></div>
     <div class="btns">
@@ -474,8 +486,8 @@ function renderHome() {
   `;
   new QRCode(document.getElementById("qrcode"), {
     text: url,
-    width: 180,
-    height: 180,
+    width: 90,
+    height: 90,
     colorDark: "#7d1f3d",
     colorLight: "#ffffff"
   });
